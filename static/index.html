@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentFlow AI | Smart Sourcing & Pipeline CRM</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">TF</div>
+        <div class="brand-text">
+          <h2>TalentFlow AI</h2>
+          <span>Smart Sourcing Suite</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active"><span class="icon">📊</span> Pipeline Board</a>
+        <a href="#" class="nav-item" onclick="openImportModal()"><span class="icon">⚡</span> 1-Click Sourcing</a>
+        <a href="#" class="nav-item" onclick="openJobModal()"><span class="icon">💼</span> New Job Order</a>
+        <a href="#" class="nav-item" onclick="openPrdModal()"><span class="icon">📄</span> Product PRD Spec</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">AP</div>
+          <div class="user-info">
+            <strong>Recruiter Mode</strong>
+            <small>Executive Search</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navigation & Controls -->
+      <header class="topbar">
+        <div class="job-selector">
+          <label>Active Job Pipeline:</label>
+          <select id="jobSelect" onchange="loadCandidates()">
+            <!-- Dynamic jobs -->
+          </select>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" onclick="openSimulationPanel()">🧪 Sequence Simulator</button>
+          <button class="btn btn-primary" onclick="openImportModal()">+ Import Candidate</button>
+        </div>
+      </header>
+
+      <!-- KPI Metrics Dashboard -->
+      <section class="kpi-banner">
+        <div class="kpi-card">
+          <span class="kpi-label">Active Sourced Candidates</span>
+          <h3 id="statTotalCandidates">--</h3>
+          <span class="kpi-tag positive">+14% vs last week</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Active Drip Sequences</span>
+          <h3 id="statActiveSequences">--</h3>
+          <span class="kpi-tag positive">Auto-Triggered</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Average Match Score</span>
+          <h3 id="statAvgScore">--</h3>
+          <span class="kpi-tag positive">AI Scored</span>
+        </div>
+        <div class="kpi-card highlight">
+          <span class="kpi-label">Time-To-Submit (TTS)</span>
+          <h3>2.8 Days</h3>
+          <span class="kpi-tag highlight-tag">⚡ 42% Faster (Target < 3d)</span>
+        </div>
+      </section>
+
+      <!-- Interactive Kanban Board -->
+      <section class="kanban-wrapper">
+        <div class="kanban-header">
+          <div>
+            <h2 id="currentJobTitle">Loading Job Requisition...</h2>
+            <p id="currentJobSkills" class="job-criteria">Requirements: Loading...</p>
+          </div>
+          <div class="filter-controls">
+            <button class="chip-filter active" onclick="filterByScore('all')">All</button>
+            <button class="chip-filter" onclick="filterByScore('high')">🟢 High Fit (>80%)</button>
+            <button class="chip-filter" onclick="filterByScore('seq')">⚡ Active Outreach</button>
+          </div>
+        </div>
+
+        <div class="kanban-columns">
+          <!-- Column 1: Sourced -->
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'Sourced')">
+            <div class="col-head">
+              <span class="col-title">Sourced</span>
+              <span class="col-count" id="count-Sourced">0</span>
+            </div>
+            <div class="cards-list" id="col-Sourced"></div>
+          </div>
+
+          <!-- Column 2: Shortlisted -->
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'Shortlisted')">
+            <div class="col-head">
+              <span class="col-title">Shortlisted / Engaged</span>
+              <span class="col-count" id="count-Shortlisted">0</span>
+            </div>
+            <div class="cards-list" id="col-Shortlisted"></div>
+          </div>
+
+          <!-- Column 3: Interview -->
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'Interview')">
+            <div class="col-head">
+              <span class="col-title">Interview Stage</span>
+              <span class="col-count" id="count-Interview">0</span>
+            </div>
+            <div class="cards-list" id="col-Interview"></div>
+          </div>
+
+          <!-- Column 4: Client Review -->
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'Client Review')">
+            <div class="col-head">
+              <span class="col-title">Client Review / Submission</span>
+              <span class="col-count" id="count-Client Review">0</span>
+            </div>
+            <div class="cards-list" id="col-Client Review"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: 1-Click Candidate Sourcing (Simulating Chrome Extension) -->
+  <div class="modal-backdrop" id="importModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="extension-badge">⚡ Chrome Extension Ingestion Mode</div>
+        <button class="close-btn" onclick="closeModal('importModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h3>Import Candidate to Active Pipeline</h3>
+        <p class="subtitle">Simulate capturing a LinkedIn / GitHub candidate profile into your talent pipeline.</p>
+
+        <form id="importForm" onsubmit="handleCandidateSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Candidate Full Name</label>
+              <input type="text" id="candName" placeholder="e.g. Rachel Adams" required onblur="checkDuplicate()">
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="candEmail" placeholder="rachel.adams@example.com" required onblur="checkDuplicate()">
+            </div>
+          </div>
+
+          <div id="duplicateAlert" class="duplicate-alert" style="display: none;">
+            ⚠️ <strong>Potential Duplicate Found:</strong> An existing record matches this candidate.
+          </div>
+
+          <div class="form-group">
+            <label>Headline / Current Role</label>
+            <input type="text" id="candHeadline" placeholder="e.g. Lead Product Strategist | B2B SaaS" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Years of Relevant Experience</label>
+              <input type="number" id="candExp" min="0" max="30" value="4" required>
+            </div>
+            <div class="form-group">
+              <label>Current Location</label>
+              <input type="text" id="candLoc" placeholder="e.g. London / Remote" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Candidate Core Skills (Comma-separated)</label>
+            <input type="text" id="candSkills" placeholder="e.g. Product Strategy, User Stories, B2B SaaS, Agile, Data Analytics" required>
+            <small class="helper-text">Our AI engine compares these against the active job order's mandatory requirements.</small>
+          </div>
+
+          <div class="sequence-box">
+            <label class="checkbox-container">
+              <input type="checkbox" id="autoSequence" checked>
+              <span class="checkmark"></span>
+              <strong>Enroll in 2-Touch Outreach Drip Immediately</strong>
+            </label>
+            <p class="sequence-desc">Sends personalized pitch email now, and schedules automatic follow-up in 3 days if no response.</p>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('importModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btnImport">Import & Score Candidate</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Score Breakdown & Profile Flyout -->
+  <div class="modal-backdrop" id="scoreModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>AI Fit Analysis & Candidate Profile</h3>
+        <button class="close-btn" onclick="closeModal('scoreModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="scoreModalBody">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create Job Requisition -->
+  <div class="modal-backdrop" id="jobModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Create New Client Job Order</h3>
+        <button class="close-btn" onclick="closeModal('jobModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleJobCreate(event)">
+          <div class="form-group">
+            <label>Job Title</label>
+            <input type="text" id="jobTitleInput" placeholder="e.g. Staff Growth Product Manager" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" id="jobDeptInput" placeholder="e.g. Product" required>
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" id="jobLocInput" placeholder="e.g. Remote" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Minimum Experience (Years)</label>
+              <input type="number" id="jobExpInput" min="0" value="3" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Required Mandatory Skills (Comma separated)</label>
+            <textarea id="jobSkillsInput" rows="3" placeholder="Product Strategy, B2B SaaS, Roadmapping, Agile, Metrics" required></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('jobModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Job Order</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Product PRD Viewer -->
+  <div class="modal-backdrop" id="prdModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>Product Requirements Document (PRD) Overview</h3>
+        <button class="close-btn" onclick="closeModal('prdModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="prd-content-view">
+          <h4>Product Concept: TalentFlow AI (Next-Gen Sourcing Suite)</h4>
+          <p>This interactive web app demonstrates the implementation of a modern ATS & CRM designed to eliminate recruiter bottlenecks in candidate sourcing and pipeline advancement.</p>
+          <hr>
+          <h5>Core Features Implemented in this Project:</h5>
+          <ul>
+            <li><strong>AI Requisition Fit Engine</strong>: Real-time scoring (0-100%) against job order requirements with skill match/gap breakdown.</li>
+            <li><strong>Automated Multi-Touch Sequences</strong>: Dispatches initial pitch and automated 3-day follow-ups with auto-pause on candidate reply.</li>
+            <li><strong>Visual Pipeline Management</strong>: Drag-and-drop Kanban workflow for candidate evaluation.</li>
+            <li><strong>Duplicate Ingestion Guard</strong>: Real-time candidate identity collision check across email and name.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
